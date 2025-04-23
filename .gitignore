@@ -1,0 +1,4 @@
+*/migrations/*.py
+.env
+static/
+__pycache__/
