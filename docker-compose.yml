@@ -1,0 +1,65 @@
+services:
+  redis:
+    container_name: live-chat-backend-redis
+    restart: always
+    image: redis:5
+    # ports:
+    #   - "6370:6379"
+    volumes:
+      - redisdata:/data
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  web: # This line was indented incorrectly
+    container_name: live_chat_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: live_chat_backend:latest
+    volumes:
+      - .:/app
+      - ./static:/app/static
+      - ./media:/app/media
+    ports:
+      - "9011:9011" # Added port mapping
+    depends_on:
+      db:
+        condition: service_healthy
+      redis: # Add dependency on redis
+        condition: service_started
+    environment:
+      - DEBUG=${DEBUG}
+    command: >
+      bash -c "python manage.py runserver 0.0.0.0:9011"
+    restart: always
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8989:8080"
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+      - ADMINER_DESIGN=dracula
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  redisdata:
