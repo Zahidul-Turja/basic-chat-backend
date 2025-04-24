@@ -1,0 +1,14 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /app/django_info.log
+
+setup.template.name: "filebeat"
+setup.template.pattern: "filebeat-*"
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: "elastic"
+  password: "admin123"
+  index: "filebeat-%{+yyyy.MM.dd}"

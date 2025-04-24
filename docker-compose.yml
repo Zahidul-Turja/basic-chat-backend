@@ -1,12 +1,13 @@
+version: "3"
+
 services:
   redis:
     container_name: live-chat-backend-redis
     restart: always
     image: redis:5
-    # ports:
-    #   - "6370:6379"
     volumes:
       - redisdata:/data
+
   db:
     image: postgres:15-alpine
     volumes:
@@ -24,7 +25,7 @@ services:
       retries: 5
     restart: always
 
-  web: # This line was indented incorrectly
+  web:
     container_name: live_chat_backend
     build:
       context: .
@@ -35,16 +36,53 @@ services:
       - ./static:/app/static
       - ./media:/app/media
     ports:
-      - "9011:9011" # Added port mapping
+      - "9011:9011"
     depends_on:
       db:
         condition: service_healthy
-      redis: # Add dependency on redis
+      redis:
         condition: service_started
     environment:
       - DEBUG=${DEBUG}
     command: >
       bash -c "python manage.py runserver 0.0.0.0:9011"
+    restart: always
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:7.10.2
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
+      # - ./django_info.log:/app/django_info.log
+
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=admin123
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.2
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=admin123
+      - xpack.security.enabled=true
+    depends_on:
+      - elasticsearch
     restart: always
 
   adminer:

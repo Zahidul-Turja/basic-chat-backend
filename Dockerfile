@@ -21,7 +21,9 @@ RUN apt-get update \
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && mkdir -p /app/logs
 
+# RUN mkdir -p /app/logs
 # Copy project
 COPY . /app/
