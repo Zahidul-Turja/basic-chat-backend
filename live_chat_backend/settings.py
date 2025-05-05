@@ -50,7 +50,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "live_chat_backend.middlewares.RequestLogMiddleware",
+    # "live_chat_backend.middlewares.RequestLogMiddleware",
 ]
 
 ROOT_URLCONF = "live_chat_backend.urls"

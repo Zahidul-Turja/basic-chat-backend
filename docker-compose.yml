@@ -13,13 +13,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PASSWORD="5pc_p@55w0rd_"
+      - POSTGRES_USER="spc_admin"
+      - POSTGRES_DB="live_chat_backend"
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U spc_admin -d live_chat_backend"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -48,42 +48,42 @@ services:
       bash -c "python manage.py runserver 0.0.0.0:9011"
     restart: always
 
-  filebeat:
-    container_name: filebeat
-    image: docker.elastic.co/beats/filebeat:7.10.2
-    user: root
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
-      # - ./django_info.log:/app/django_info.log
+  # filebeat:
+  #   container_name: filebeat
+  #   image: docker.elastic.co/beats/filebeat:7.10.2
+  #   user: root
+  #   volumes:
+  #     - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
+  #     # - ./django_info.log:/app/django_info.log
 
-    depends_on:
-      - db
-      - redis
-    restart: always
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   restart: always
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-    environment:
-      - discovery.type=single-node
-      - ELASTIC_PASSWORD=admin123
-      - xpack.security.enabled=true
-    ports:
-      - "9200:9200"
-    restart: always
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+  #   environment:
+  #     - discovery.type=single-node
+  #     - ELASTIC_PASSWORD=admin123
+  #     - xpack.security.enabled=true
+  #   ports:
+  #     - "9200:9200"
+  #   restart: always
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.2
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=admin123
-      - xpack.security.enabled=true
-    depends_on:
-      - elasticsearch
-    restart: always
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:7.10.2
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     - ELASTICSEARCH_URL=http://elasticsearch:9200
+  #     - ELASTICSEARCH_USERNAME=elastic
+  #     - ELASTICSEARCH_PASSWORD=admin123
+  #     - xpack.security.enabled=true
+  #   depends_on:
+  #     - elasticsearch
+  #   restart: always
 
   adminer:
     image: adminer:latest
